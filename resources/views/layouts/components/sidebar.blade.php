@@ -82,7 +82,7 @@
                 <li class="nav-item">
                     <a class="nav-link menu-link {{ request()->routeIs('dashboard.index') ? 'active' : '' }}" href="{{ route('dashboard.index') }}">
                         <i class="ri-dashboard-2-line"></i>
-                        <span data-key="t-dashboards">Dashboard</span>
+                        <span data-key="t-dashboards">Main BAS</span>
                     </a>
                 </li>
 
@@ -179,6 +179,16 @@
                 @endif
 
                 <!-- Info User -->
+                <li class="menu-title mt-4">
+                    <span data-key="t-user">Manage User</span>
+                </li>
+                @if (in_array($jabatan, ['dept_head', 'supervisor']))
+                <li class="nav-item">
+                    <a href="{{ url('users/index') }}" class="nav-link menu-link  {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                        <i class="mdi mdi-folder-account"></i> <span data-key="t-tkbm">Manage User</span>
+                    </a>
+                </li>
+                @endif
                 <li class="menu-title mt-4">
                     <span data-key="t-info">User Info</span>
                 </li>

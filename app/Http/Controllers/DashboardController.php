@@ -61,6 +61,7 @@ class DashboardController extends Controller
         return back()->with('error', 'Portal tidak mengembalikan URL redirect');
     }
 
+    //eng
     public function Dashboard_Boiler()
     {
         return view('dashboard_boiler');
@@ -69,12 +70,12 @@ class DashboardController extends Controller
 
     public function Dashboard_Utility()
     {
-        return view('dashboard_utility');
+        return view('eng.dashboard_utility');
     }
 
     public function Dashboard_scoring()
     {
-        return view('dashboard_scoring');
+        return view('eng.dashboard_scoring_mesin');
     }
 
     //QC
@@ -139,32 +140,32 @@ class DashboardController extends Controller
     // Data Mesin
     public function Mesin_DailyTank()
     {
-        return view('mesin.daily_tank');
+        return view('mesin.mesin_daily_tank');
     }
 
     public function Mesin_Pasteur1()
     {
-        return view('mesin.pasteur1');
+        return view('mesin.mesin_pasteur1');
     }
 
     public function Mesin_Pasteur2()
     {
-        return view('mesin.pasteur2');
+        return view('mesin.mesin_pasteur2');
     }
 
     public function Mesin_Disolver()
     {
-        return view('mesin.disolver');
+        return view('mesin.mesin_dissolver');
     }
 
     public function Mesin_Boiler()
     {
-        return view('mesin.boiler');
+        return view('mesin.mesin_mesin_boiler');
     }
 
     public function Mesin_Glucose()
     {
-        return view('mesin.glucose');
+        return view('mesin.mesin_glucose');
     }
 }
 
