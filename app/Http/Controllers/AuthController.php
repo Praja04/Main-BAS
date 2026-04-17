@@ -7,15 +7,43 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
+use App\Services\PortalTokenService;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    public function showLoginForm()
+    protected PortalTokenService $portalTokenService;
+
+    public function __construct(PortalTokenService $portalTokenService)
     {
+        $this->portalTokenService = $portalTokenService;
+    }
+
+    /**
+     * Tampilkan form login.
+     * Jika ada ?portal=xxx, simpan di session untuk SSO redirect setelah login.
+     * Jika user sudah login dan ada ?portal=xxx, langsung redirect ke portal.
+     */
+    public function showLoginForm(Request $request)
+    {
+        if ($request->has('portal')) {
+            $portal = $request->query('portal');
+
+            // Jika sudah login, langsung redirect ke portal
+            if (Auth::check()) {
+                return $this->redirectToPortal(Auth::user(), $portal);
+            }
+
+            // Simpan target portal di session untuk dipakai setelah login
+            Session::put('sso_portal', $portal);
+        }
+
         return view('auth.login');
     }
 
+    /**
+     * Proses login.
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -23,27 +51,55 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = \App\Models\User::where('username', $request->username)
+        $user = User::where('username', $request->username)
             ->orWhere('nik', $request->username)
             ->first();
 
-        if (!$user || !\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Username atau password salah.',
             ], 401);
         }
 
-        \Illuminate\Support\Facades\Auth::login($user);
+        Auth::login($user);
         $request->session()->regenerate();
 
+        // Cek apakah ada tujuan portal SSO dari session
+        $portal = Session::pull('sso_portal');
+
+        if ($portal) {
+            $redirectUrl = $this->portalTokenService->generateRedirectUrl($user, $portal);
+
+            if (!$redirectUrl) {
+                Log::warning("SSO: Portal tidak valid [{$portal}] pada saat login");
+                // Fallback ke dashboard jika portal tidak valid
+                $redirectUrl = route('dashboard.index');
+            }
+        } else {
+            $redirectUrl = route('dashboard.index');
+        }
+
         return response()->json([
-            'success' => true,
-            'message' => 'Selamat datang, ' . $user->name,
-            'redirect' => route('dashboard.index'),
+            'success'  => true,
+            'message'  => 'Selamat datang, ' . $user->username,
+            'redirect' => $redirectUrl,
         ]);
     }
 
+    /**
+     * Helper: generate token dan redirect user ke portal.
+     */
+    protected function redirectToPortal(User $user, string $portal)
+    {
+        $url = $this->portalTokenService->generateRedirectUrl($user, $portal);
+
+        if (!$url) {
+            return redirect()->route('dashboard.index')->with('error', 'Portal tidak valid');
+        }
+
+        return redirect()->away($url);
+    }
 
     public function logout(Request $request)
     {
@@ -54,13 +110,13 @@ class AuthController extends Controller
         return redirect()->route('login')->with('message', 'Logout berhasil');
     }
 
+    // ==================== User Management ====================
 
     public function manage_user()
     {
         return view('user.manage_user');
     }
 
-    // Menyediakan data untuk DataTables
     public function getUsers()
     {
         $users = User::select('id', 'username', 'jabatan', 'email', 'nik', 'image', 'created_at', 'departemen', 'bagian')->get();
@@ -68,18 +124,17 @@ class AuthController extends Controller
         return response()->json($users);
     }
 
-    // Menyimpan data pengguna baru
     public function store(Request $request)
     {
         $request->validate([
-            'username' => 'required|unique:users',
-            'password' => 'required|min:6',
-            'email' => 'required|email',
-            'jabatan' => 'required',
-            'nik' => 'required',
+            'username'   => 'required|unique:users',
+            'password'   => 'required|min:6',
+            'email'      => 'required|email',
+            'jabatan'    => 'required',
+            'nik'        => 'required',
             'departemen' => 'required',
-            'bagian' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'bagian'     => 'required',
+            'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $imageName = null;
@@ -89,67 +144,62 @@ class AuthController extends Controller
         }
 
         User::create([
-            'username' => $request->username,
-            'password' => bcrypt($request->password),
-            'email' => $request->email,
-            'nik' => $request->nik,
-            'jabatan' => $request->jabatan,
+            'username'   => $request->username,
+            'password'   => bcrypt($request->password),
+            'email'      => $request->email,
+            'nik'        => $request->nik,
+            'jabatan'    => $request->jabatan,
             'departemen' => $request->departemen,
-            'bagian' => $request->bagian,
-            'image' => $imageName,
+            'bagian'     => $request->bagian,
+            'image'      => $imageName,
         ]);
 
         return response()->json(['success' => 'User created successfully.']);
     }
 
-    // Menampilkan data pengguna untuk di-edit
     public function edit($id)
     {
         $user = User::findOrFail($id);
         return response()->json($user);
     }
 
-    // Mengupdate data pengguna
     public function update(Request $request, $id)
     {
         $request->validate([
-            'username' => 'required|unique:users,username,' . $id,
-            'email' => 'required|email',
-            'jabatan' => 'required',
-            'nik' => 'required',
+            'username'   => 'required|unique:users,username,' . $id,
+            'email'      => 'required|email',
+            'jabatan'    => 'required',
+            'nik'        => 'required',
             'departemen' => 'required',
-            'bagian' => 'required',
-            'password' => 'nullable|min:6',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'bagian'     => 'required',
+            'password'   => 'nullable|min:6',
+            'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $user = User::findOrFail($id);
 
-        // Handle image upload
         if ($request->hasFile('image')) {
             if ($user->image && file_exists(public_path('uploads/users/' . $user->image))) {
                 unlink(public_path('uploads/users/' . $user->image));
             }
-            $imageName = time() . '.' . $request->image->extension();
+            $imageName  = time() . '.' . $request->image->extension();
             $request->image->move(public_path('uploads/users'), $imageName);
             $user->image = $imageName;
         }
 
-        // Update data user
         $user->update([
-            'username' => $request->username,
-            'email' => $request->email,
-            'jabatan' => $request->jabatan,
-            'nik' => $request->nik,
+            'username'   => $request->username,
+            'email'      => $request->email,
+            'jabatan'    => $request->jabatan,
+            'nik'        => $request->nik,
             'departemen' => $request->departemen,
-            'bagian' => $request->bagian,
-            'password' => $request->password ? bcrypt($request->password) : $user->password,
+            'bagian'     => $request->bagian,
+            'password'   => $request->password ? bcrypt($request->password) : $user->password,
         ]);
 
         return response()->json(['success' => 'User updated successfully.']);
     }
 
-    // Menghapus data pengguna
     public function destroy($id)
     {
         $user = User::findOrFail($id);
@@ -162,12 +212,10 @@ class AuthController extends Controller
 
     public function getTotalUsers()
     {
-        // Mengambil jumlah total user
         $totalUsers = User::count();
 
-        // Mengembalikan response dalam bentuk JSON
         return response()->json([
-            'success' => true,
+            'success'     => true,
             'total_users' => $totalUsers,
         ]);
     }
