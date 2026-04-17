@@ -19,19 +19,19 @@ class PortalCredentialController extends Controller
         return [
             [
                 'portal_name' => 'Engineering',
-                'portal_url' => 'http://10.11.10.130:8090/engineering/public',
+                'portal_url' => 'http://10.11.10.130:8090',
                 'icon' => '⚙️',
                 'description' => 'Engineering Portal'
             ],
             [
                 'portal_name' => 'Warehouse',
-                'portal_url' => 'http://10.11.10.130:8087/warehouse/public',
+                'portal_url' => 'http://10.11.10.130:8087',
                 'icon' => '📦',
                 'description' => 'Warehouse Management'
             ],
             [
                 'portal_name' => 'QC',
-                'portal_url' => 'http://10.11.10.130:8081/public',
+                'portal_url' => 'http://10.11.10.130:8081',
                 'icon' => '🔗',
                 'description' => 'Portal 3'
             ],
