@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'sso_secret_key' => env('SSO_SECRET_KEY', 'BAS_SSO_SECRET_2025'),
+
 ];

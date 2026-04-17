@@ -5,129 +5,135 @@ namespace App\Services;
 use App\Models\PortalToken;
 use App\Models\User;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class PortalTokenService
 {
-    protected array $portalEndpoints = [
-        'engineering' => [
-            'base_url' => 'http://10.11.10.130:8090/engineering/public',
-            'api_endpoint' => '/api/auth/validate-token',
-        ],
-        'warehouse' => [
-            'base_url' => 'http://10.11.10.130:8087/warehouse/public',
-            'api_endpoint' => '/api/auth/validate-token',
-        ],
-        'production' => [
-            'base_url' => 'http://10.11.10.130:8095/production/public',
-            'api_endpoint' => '/api/auth/validate-token',
-        ],
-        'qc' => [
-            'base_url' => 'http://10.11.10.130:8081',
-            'api_endpoint' => '/api/auth/validate-token',
-        ],
-    ];
+    /**
+     * Portal registry — single source of truth for all portal URLs.
+     * Ambil dari .env jika tersedia, fallback ke localhost + port default.
+     */
+    protected function portals(): array
+    {
+        return [
+            'engineering' => [
+                'base_url' => env('PORTAL_ENGINEERING_URL', 'http://localhost:8090'),
+                'callback' => '/auth/sso/callback',
+                'label'    => 'Engineering',
+            ],
+            'warehouse' => [
+                'base_url' => env('PORTAL_WAREHOUSE_URL', 'http://localhost:8087'),
+                'callback' => '/auth/sso/callback',
+                'label'    => 'Warehouse',
+            ],
+            'production' => [
+                'base_url' => env('PORTAL_PRODUCTION_URL', 'http://localhost:8095'),
+                'callback' => '/auth/sso/callback',
+                'label'    => 'Production',
+            ],
+            'qc' => [
+                'base_url' => env('PORTAL_QC_URL', 'http://localhost:8081'),
+                'callback' => '/auth/sso/callback',
+                'label'    => 'QC',
+            ],
+        ];
+    }
 
     /**
-     * Generate token untuk portal tertentu
+     * Cek apakah portal key valid.
+     */
+    public function isValidPortal(string $portalTarget): bool
+    {
+        return isset($this->portals()[$portalTarget]);
+    }
+
+    /**
+     * Dapatkan semua definisi portal (untuk tampilan dashboard).
+     */
+    public function getPortals(): array
+    {
+        return array_map(fn($p) => [
+            'base_url' => $p['base_url'],
+            'label'    => $p['label'],
+        ], $this->portals());
+    }
+
+    /**
+     * Generate one-time SSO token untuk user targeting portal tertentu.
      */
     public function generateToken(User $user, string $portalTarget): PortalToken
     {
-        // Hapus token lama yang belum digunakan untuk user & portal yang sama
+        // Hapus token lama yang belum dipakai untuk user & portal yang sama
         PortalToken::where('user_id', $user->id)
             ->where('portal_target', $portalTarget)
             ->where('used', false)
             ->delete();
 
-        $token = PortalToken::create([
-            'token' => Str::random(64),
-            'user_id' => $user->id,
+        return PortalToken::create([
+            'token'         => Str::random(64),
+            'user_id'       => $user->id,
             'portal_target' => $portalTarget,
-            'user_data' => [
-                'id' => $user->id,
-                'username' => $user->username,
-                'email' => $user->email,
-                'name' => $user->name,
-                'nik' => $user->nik,
-                'jabatan' => $user->jabatan,
+            'user_data'     => [
+                'id'         => $user->id,
+                'username'   => $user->username,
+                'email'      => $user->email,
+                'name'       => $user->name ?? $user->username,
+                'nik'        => $user->nik,
+                'jabatan'    => $user->jabatan,
                 'departemen' => $user->departemen,
-                'bagian' => $user->bagian,
+                'bagian'     => $user->bagian,
             ],
-            'expires_at' => now()->addMinutes(5), // Token valid 5 menit
+            'expires_at' => now()->addMinutes(5),
         ]);
-
-        return $token;
     }
 
     /**
-     * Kirim token ke portal target untuk validasi
+     * Generate URL redirect browser ke portal SSO callback.
+     * Ini yang dipakai setelah user menekan tombol portal di dashboard.
      */
-    public function sendTokenToPortal(PortalToken $portalToken): array
+    public function generateRedirectUrl(User $user, string $portalTarget): ?string
     {
-        $portal = $this->portalEndpoints[$portalToken->portal_target] ?? null;
+        $portals = $this->portals();
+        $portal  = $portals[$portalTarget] ?? null;
 
         if (!$portal) {
-            return [
-                'success' => false,
-                'message' => 'Portal tidak ditemukan',
-            ];
+            Log::warning("SSO: Portal target tidak dikenal [{$portalTarget}]");
+            return null;
         }
 
-        try {
-            $response = Http::timeout(10)
-                ->post($portal['base_url'] . $portal['api_endpoint'], [
-                    'token' => $portalToken->token,
-                    'user_data' => $portalToken->user_data,
-                    'expires_at' => $portalToken->expires_at->toIso8601String(),
-                ]);
+        $token = $this->generateToken($user, $portalTarget);
 
-            if ($response->successful()) {
-                $data = $response->json();
+        $callbackUrl = rtrim($portal['base_url'], '/') . $portal['callback'] . '?token=' . $token->token;
 
-                return [
-                    'success' => true,
-                    'redirect_url' => $data['redirect_url'] ?? null,
-                    'session_token' => $data['session_token'] ?? null,
-                ];
-            }
+        Log::info("SSO: Token dihasilkan untuk [{$portalTarget}]", [
+            'user'         => $user->username,
+            'callback_url' => $callbackUrl,
+        ]);
 
-            Log::error('Portal token validation failed', [
-                'portal' => $portalToken->portal_target,
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Gagal menghubungi portal: ' . $response->status(),
-            ];
-        } catch (\Exception $e) {
-            Log::error('Portal communication error', [
-                'portal' => $portalToken->portal_target,
-                'error' => $e->getMessage(),
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Error komunikasi dengan portal: ' . $e->getMessage(),
-            ];
-        }
+        return $callbackUrl;
     }
 
     /**
-     * Validasi token (untuk dipanggil dari portal lain)
+     * Verifikasi token — dipanggil oleh portal consumer via POST /api/sso/verify.
+     * Return user_data jika valid, null jika tidak valid/expired.
      */
-    public function validateToken(string $token): ?array
+    public function verifyToken(string $token): ?array
     {
         $portalToken = PortalToken::where('token', $token)->first();
 
         if (!$portalToken || !$portalToken->isValid()) {
+            Log::warning("SSO: Token tidak valid atau sudah expired", [
+                'token_prefix' => substr($token, 0, 8) . '...',
+            ]);
             return null;
         }
 
-        // Mark token as used
         $portalToken->markAsUsed();
+
+        Log::info("SSO: Token berhasil diverifikasi", [
+            'portal' => $portalToken->portal_target,
+            'user'   => $portalToken->user_data['username'] ?? 'unknown',
+        ]);
 
         return $portalToken->user_data;
     }

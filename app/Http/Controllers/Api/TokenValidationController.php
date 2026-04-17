@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\PortalTokenService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TokenValidationController extends Controller
 {
@@ -15,18 +16,40 @@ class TokenValidationController extends Controller
         $this->tokenService = $tokenService;
     }
 
-    public function validateToken(Request $request)
+    /**
+     * Endpoint SSO verifikasi token.
+     * Dipanggil oleh portal consumer (Warehouse, Engineering, dll.)
+     * setelah menerima ?token=xxx dari URL callback.
+     *
+     * Request: POST /api/sso/verify
+     * Headers: X-SSO-Secret: {SSO_SECRET_KEY dari .env}
+     * Body:    { "token": "xxx" }
+     *
+     * Response sukses: { "success": true, "user_data": {...} }
+     * Response gagal:  { "success": false, "message": "..." }
+     */
+    public function verify(Request $request)
     {
-        $token = $request->input('token');
+        // Validasi shared secret key
+        $secret         = $request->header('X-SSO-Secret');
+        $expectedSecret = config('app.sso_secret_key');
 
-        if (!$token) {
+        if (!$secret || $secret !== $expectedSecret) {
+            Log::warning('SSO: Percobaan verifikasi dengan secret key tidak valid', [
+                'ip' => $request->ip(),
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Token tidak ditemukan',
-            ], 400);
+                'message' => 'Unauthorized',
+            ], 401);
         }
 
-        $userData = $this->tokenService->validateToken($token);
+        // Validasi input
+        $request->validate([
+            'token' => 'required|string|size:64',
+        ]);
+
+        $userData = $this->tokenService->verifyToken($request->input('token'));
 
         if (!$userData) {
             return response()->json([
@@ -36,7 +59,7 @@ class TokenValidationController extends Controller
         }
 
         return response()->json([
-            'success' => true,
+            'success'   => true,
             'user_data' => $userData,
         ]);
     }

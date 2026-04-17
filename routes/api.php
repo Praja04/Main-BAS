@@ -1,5 +1,32 @@
 <?php
+
 use App\Http\Controllers\Api\TokenValidationController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/auth/validate-token', [TokenValidationController::class, 'validate']);
+/**
+ * SSO Verification Endpoint (tidak pakai auth middleware - portal tidak punya session Main-BAS)
+ * Diproteksi menggunakan X-SSO-Secret header.
+ */
+Route::post('/sso/verify', [TokenValidationController::class, 'verify'])
+    ->name('api.sso.verify');
+
+/**
+ * User info (untuk portal yang sudah punya Sanctum token - opsional)
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return response()->json([
+            'success' => true,
+            'user'    => [
+                'id'         => $request->user()->id,
+                'username'   => $request->user()->username,
+                'email'      => $request->user()->email,
+                'nik'        => $request->user()->nik,
+                'jabatan'    => $request->user()->jabatan,
+                'departemen' => $request->user()->departemen,
+                'bagian'     => $request->user()->bagian,
+            ],
+        ]);
+    });
+});
