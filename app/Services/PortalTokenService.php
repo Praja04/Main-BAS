@@ -17,22 +17,26 @@ class PortalTokenService
     {
         return [
             'engineering' => [
-                'base_url' => env('PORTAL_ENGINEERING_URL', 'http://localhost:8090'),
+                // 'base_url' => env('PORTAL_ENGINEERING_URL', 'http://localhost:8090'),
+                'base_url' => env('PORTAL_ENGINEERING_URL', 'http://10.11.10.130:8090'),
                 'callback' => '/auth/sso/callback',
                 'label'    => 'Engineering',
             ],
             'warehouse' => [
-                'base_url' => env('PORTAL_WAREHOUSE_URL', 'http://localhost:8087'),
+                // 'base_url' => env('PORTAL_WAREHOUSE_URL', 'http://localhost:8087'),
+                'base_url' => env('PORTAL_WAREHOUSE_URL', 'http://10.11.10.130:8087'),
                 'callback' => '/auth/sso/callback',
                 'label'    => 'Warehouse',
             ],
             'production' => [
-                'base_url' => env('PORTAL_PRODUCTION_URL', 'http://localhost:8095'),
+                // 'base_url' => env('PORTAL_PRODUCTION_URL', 'http://localhost:8095'),
+                'base_url' => env('PORTAL_PRODUCTION_URL', 'http://10.11.10.130:8095'),
                 'callback' => '/auth/sso/callback',
                 'label'    => 'Production',
             ],
             'qc' => [
-                'base_url' => env('PORTAL_QC_URL', 'http://localhost:8081'),
+                // 'base_url' => env('PORTAL_QC_URL', 'http://localhost:8081'),
+                'base_url' => env('PORTAL_QC_URL', 'http://10.11.10.130:8081'),
                 'callback' => '/auth/sso/callback',
                 'label'    => 'QC',
             ],
