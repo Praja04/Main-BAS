@@ -79,7 +79,7 @@
         $canAccess = false;
 
         // RULE 1: Semua Dept Head dari departemen apapun bisa akses semua portal
-        if ($jabatan === 'dept_head') {
+        if ($jabatan === 'dept_head' || $jabatan === 'fm') {
         $canAccess = true;
         }
         // RULE 2: Semua user dari Departemen IT bisa akses semua portal
