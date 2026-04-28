@@ -1,494 +1,219 @@
 @extends('layouts.app')
 
-@section('styles')
-<style>
-    @keyframes gradientShift {
+@section('content')
+<!-- Hero Section -->
+<section class="relative min-h-[480px] lg:min-h-[400px] flex items-center overflow-hidden py-20 lg:py-0">
+    <div class="absolute inset-0 z-0">
+        <img class="w-full h-full object-cover opacity-10 brightness-50"
+            alt="corporate background"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCj3-I0iwUPe8-YZVZ_aLZdwjTPhYQCK4VojWMQiOuwfmU66K0MecvAFulu1xII21A2d1OY8zBZqY1daGyM7STMeKGqz74XghAqg0UxTE48TyYH4hbhu5b-WjYqLv2jTAyCfDP2JM_C8eC2WGyYlpoz2YDgKnRkU1F4rCBdzpwWua5Q1B34P1PnOpegJfwwOmCo2O7TFlAZM694N3GQuSL9yn_Tn3u1NWuh00lng_nJV3ghssKccv8kPcBA_apUA9ZVB7DL878Ue18" />
+        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent"></div>
+    </div>
+    <div class="max-w-[1440px] mx-auto px-6 w-full relative z-10">
+        <div class="max-w-2xl">
+            <h1 class="font-h1 text-h1 text-on-surface mb-4">PT. Bumi Alam Segar</h1>
+            <p class="font-body-lg text-body-lg text-secondary mb-8">
+                Welcome to the Multi-Division Management Portal — Gateway to <span class="text-primary font-bold">Engineering, Quality Control, Production, and Warehouse</span>
+            </p>
+            <p class="font-body-md text-secondary mb-8">Welcome Back, <strong class="text-primary">{{ Auth::user()?->username ?? 'User' }}</strong>!</p>
+            <a href="#portals"
+                class="inline-flex bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-label-bold text-label-bold items-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-95 text-white no-underline hover:text-white">
+                Go to Dashboard
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+        </div>
+    </div>
+</section>
 
-        0%,
-        100% {
-            opacity: 1;
-            transform: scale(1);
+<!-- Quick Access Panel -->
+<section class="max-w-[1440px] mx-auto px-6 -mt-12 relative z-20">
+    <div class="glass-card rounded-2xl p-6 flex flex-wrap gap-4 items-center shadow-md">
+        <span class="font-label-bold text-label-bold text-gray-500 uppercase tracking-widest mr-4">Quick
+            Access:</span>
+        <button
+            class="px-4 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest transition-colors flex items-center gap-2 text-sm font-medium border border-outline-variant">
+            <span class="material-symbols-outlined text-primary text-[20px]">assessment</span>
+            Yield Reports
+        </button>
+        <button
+            class="px-4 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest transition-colors flex items-center gap-2 text-sm font-medium border border-outline-variant">
+            <span class="material-symbols-outlined text-primary text-[20px]">engineering</span>
+            Maintenance Log
+        </button>
+        <button
+            class="px-4 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest transition-colors flex items-center gap-2 text-sm font-medium border border-outline-variant">
+            <span class="material-symbols-outlined text-primary text-[20px]">inventory_2</span>
+            Stock Audit
+        </button>
+        <button
+            class="px-4 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest transition-colors flex items-center gap-2 text-sm font-medium border border-outline-variant">
+            <span class="material-symbols-outlined text-primary text-[20px]">gavel</span>
+            Compliance docs
+        </button>
+    </div>
+</section>
+
+<!-- Main Grid Section -->
+<section id="portals" class="max-w-[1440px] mx-auto px-6 py-16">
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="font-h2 text-h2">Operational Departments</h2>
+        <div class="flex gap-2 items-center text-accent-success font-label-bold">
+            <span class="w-2 h-2 rounded-full bg-accent-success animate-pulse"></span>
+            System Online
+        </div>
+    </div>
+
+    <!-- Alert Message Container -->
+    <div id="alertMessageContainer" class="hidden mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-r-lg shadow-sm">
+        <div class="flex items-center">
+            <span class="material-symbols-outlined mr-2">error</span>
+            <p id="alertMessageText" class="font-medium"></p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+        @foreach ($portals as $key => $url)
+        @php
+        $jabatan = strtolower(Auth::user()?->jabatan ?? '');
+        $departemen = strtoupper(Auth::user()?->departemen ?? '');
+        $canAccess = false;
+
+        // RULE 1: Semua Dept Head dari departemen apapun bisa akses semua portal
+        if ($jabatan === 'dept_head') {
+        $canAccess = true;
+        }
+        // RULE 2: Semua user dari Departemen IT bisa akses semua portal
+        elseif ($departemen === 'IT') {
+        $canAccess = true;
+        }
+        // RULE 3: User lain hanya bisa akses portal sesuai departemen mereka
+        else {
+        $jabatanUpper = strtoupper($jabatan);
+
+        $portalAccess = [
+        'engineering' => ['ENGINEERING', 'ENG'],
+        'warehouse' => ['WAREHOUSE', 'WH'],
+        'production' => ['PRODUCTION', 'PROD'],
+        'qc' => ['QUALITY CONTROL', 'QC'],
+        ];
+
+        if (isset($portalAccess[$key])) {
+        foreach ($portalAccess[$key] as $allowedRole) {
+        if (str_contains($jabatanUpper, $allowedRole) || str_contains($departemen, $allowedRole)) {
+        $canAccess = true;
+        break;
+        }
+        }
+        }
         }
 
-        50% {
-            opacity: 0.8;
-            transform: scale(1.1);
+        // Portal Card Attributes
+        $portalIcon = 'dashboard';
+        $portalStatusText = 'Online';
+        $portalStatusClass = 'bg-green-100 text-accent-success';
+        $portalDesc = 'Akses portal ' . ucfirst($key) . ' untuk melihat data dan aktivitas departemen secara lengkap dan terperinci.';
+
+        if ($key === 'engineering') {
+        $portalIcon = 'architecture';
+        $portalStatusText = 'Active';
+        $portalDesc = 'R&D lifecycle management, technical schematics repository, and prototype performance monitoring.';
+        } elseif ($key === 'warehouse') {
+        $portalIcon = 'warehouse';
+        $portalStatusText = 'Active';
+        $portalDesc = 'Automated inventory tracking, logistics coordination, and storage optimization for high-volume output.';
+        } elseif ($key === 'production') {
+        $portalIcon = 'precision_manufacturing';
+        $portalStatusText = 'Active';
+        $portalDesc = 'Live assembly line telemetry, output forecasting, and personnel shift scheduling systems.';
+        } elseif ($key === 'qc') {
+        $portalIcon = 'verified';
+        $portalStatusText = 'Active';
+        $portalDesc = 'Strict adherence to ISO standards, batch testing analytics, and defect tracking reports.';
         }
-    }
+        @endphp
 
-    /* Header Section */
-    .header-section {
-        text-align: center;
-        margin-bottom: 3rem;
-        position: relative;
-    }
+        <!-- Card -->
+        <div class="bg-white p-md rounded-[12px] border {{ $canAccess ? 'border-gray-200 shadow-sm hover:shadow-md' : 'border-gray-300 shadow-none opacity-75 grayscale-[50%]' }} transition-shadow flex flex-col h-full group relative">
+            @if(!$canAccess)
+            <div class="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full z-10 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">lock</span>
+                Restricted Access
+            </div>
+            @endif
+            <div class="flex justify-between items-start mb-6">
+                <div class="w-12 h-12 bg-primary-fixed rounded-xl flex items-center justify-center text-primary-container">
+                    <span class="material-symbols-outlined text-[28px]">{{ $portalIcon }}</span>
+                </div>
+                @if($canAccess)
+                <span class="px-3 py-1 rounded-full {{ $portalStatusClass }} text-[10px] font-bold uppercase tracking-wider">{{ $portalStatusText }}</span>
+                @endif
+            </div>
+            <h3 class="font-h3 text-h3 mb-2">{{ is_array($url) && isset($url['label']) ? $url['label'] : ucfirst($key) }}</h3>
+            <p class="text-secondary font-body-md mb-8 flex-grow">{{ $portalDesc }}</p>
 
-    @keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
+            @if($canAccess)
+            <form method="POST" action="{{ route('portal.redirect', $key) }}" class="portal-form mt-auto">
+                @csrf
+                <button type="submit"
+                    class="w-full py-3 rounded-lg border-2 border-primary-container text-primary-container font-label-bold hover:bg-primary-container hover:text-white transition-all flex items-center justify-center gap-2 group-hover:scale-[1.01] cursor-pointer">
+                    Enter Portal
+                    <span class="material-symbols-outlined text-[18px]">login</span>
+                </button>
+            </form>
+            @else
+            <button type="button" onclick="showAccessDenied('{{ ucfirst($key) }}')"
+                class="w-full py-3 rounded-lg border-2 border-gray-400 text-gray-500 font-label-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2 mt-auto">
+                Access Denied
+                <span class="material-symbols-outlined text-[18px]">lock</span>
+            </button>
+            @endif
+        </div>
+        @endforeach
+    </div>
+</section>
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .robot-container {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 1.5rem;
-        animation: floatRobot 3s ease-in-out infinite;
-    }
-
-    @keyframes floatRobot {
-
-        0%,
-        100% {
-            transform: translateY(0px);
-        }
-
-        50% {
-            transform: translateY(-15px);
-        }
-    }
-
-    .lottie-robot {
-        filter: drop-shadow(0 15px 35px rgba(102, 126, 234, 0.4));
-    }
-
-    .welcome-title {
-        font-size: 3rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 0.5rem;
-    }
-
-    .welcome-subtitle {
-        font-size: 1.4rem;
-        color: #555;
-        font-weight: 400;
-    }
-
-    .welcome-subtitle strong {
-        color: #667eea;
-        font-weight: 600;
-    }
-
-    /* Portal Cards */
-    .portals-section {
-        position: relative;
-        z-index: 1;
-    }
-
-    .portal-card {
-        /* background: rgba(255, 255, 255, 0.98); */
-        border-radius: 24px;
-        padding: 2.5rem;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: none;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .portal-card.disabled {
-        opacity: 0.6;
-        background: rgba(255, 255, 255, 0.7);
-    }
-
-    .portal-card.disabled::after {
-        content: '🔒 Akses Terbatas';
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: rgba(220, 38, 38, 0.9);
-        color: white;
-        padding: 0.4rem 1rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .portal-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 5px;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.4s ease;
-    }
-
-    .portal-card:not(.disabled):hover::before {
-        transform: scaleX(1);
-    }
-
-    .portal-card:not(.disabled):hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
-    }
-
-    .portal-icon {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 1.5rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-        color: white;
-        transition: all 0.3s ease;
-    }
-
-    .portal-card.disabled .portal-icon {
-        background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-    }
-
-    .portal-card:not(.disabled):hover .portal-icon {
-        transform: scale(1.1) rotate(5deg);
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-    }
-
-    .portal-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 1rem;
-        text-transform: capitalize;
-    }
-
-    .portal-description {
-        color: #718096;
-        font-size: 1rem;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-    }
-
-    .portal-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 0.9rem 2rem;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        width: 100%;
-    }
-
-    .portal-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-    }
-
-    .portal-btn:disabled {
-        background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-        cursor: not-allowed;
-        box-shadow: none;
-    }
-
-    .portal-btn:disabled:hover {
-        transform: none;
-    }
-
-    /* Decorative Elements */
-    .floating-shapes {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    .shape {
-        position: absolute;
-        opacity: 0.1;
-        animation: float 20s infinite ease-in-out;
-    }
-
-    .shape:nth-child(1) {
-        top: 10%;
-        left: 10%;
-        width: 80px;
-        height: 80px;
-        background: white;
-        border-radius: 50%;
-        animation-delay: 0s;
-    }
-
-    .shape:nth-child(2) {
-        top: 60%;
-        right: 10%;
-        width: 60px;
-        height: 60px;
-        background: white;
-        border-radius: 30%;
-        animation-delay: 2s;
-    }
-
-    .shape:nth-child(3) {
-        bottom: 10%;
-        left: 20%;
-        width: 100px;
-        height: 100px;
-        background: white;
-        border-radius: 20%;
-        animation-delay: 4s;
-    }
-
-    @keyframes float {
-
-        0%,
-        100% {
-            transform: translateY(0) rotate(0deg);
-        }
-
-        50% {
-            transform: translateY(-30px) rotate(180deg);
-        }
-    }
-
-    /* Alert Notification */
-    .alert-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: white;
-        border-left: 4px solid #dc2626;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        z-index: 9999;
-        display: none;
-        animation: slideInRight 0.3s ease-out;
-    }
-
-    @keyframes slideInRight {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    .alert-notification.show {
-        display: block;
-    }
-
-    .alert-notification .alert-icon {
-        color: #dc2626;
-        font-size: 1.5rem;
-        margin-right: 0.75rem;
-    }
-
-    .alert-notification .alert-content {
-        display: flex;
-        align-items: center;
-    }
-
-    .alert-notification .alert-text {
-        flex: 1;
-    }
-
-    .alert-notification .alert-title {
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 0.25rem;
-    }
-
-    .alert-notification .alert-message {
-        color: #6b7280;
-        font-size: 0.9rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .welcome-title {
-            font-size: 2rem;
-        }
-
-        .welcome-subtitle {
-            font-size: 1.1rem;
-        }
-
-        .portal-card {
-            padding: 2rem;
-        }
-
-        .lottie-robot {
-            width: 250px !important;
-            height: 250px !important;
-        }
-
-        .alert-notification {
-            top: 10px;
-            right: 10px;
-            left: 10px;
-        }
-    }
-</style>
+<!-- Secondary Banner -->
+<section class="bg-surface-container-high py-16">
+    <div class="max-w-[1440px] mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="flex items-center gap-4">
+            <span class="material-symbols-outlined text-4xl text-primary">security</span>
+            <div>
+                <h4 class="font-label-bold text-label-bold">Enterprise Security</h4>
+                <p class="text-xs text-secondary">End-to-end encrypted data protocols.</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="material-symbols-outlined text-4xl text-primary">speed</span>
+            <div>
+                <h4 class="font-label-bold text-label-bold">Real-time Telemetry</h4>
+                <p class="text-xs text-secondary">Under 50ms latency for global sensors.</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="material-symbols-outlined text-4xl text-primary">cloud_done</span>
+            <div>
+                <h4 class="font-label-bold text-label-bold">Cloud Synced</h4>
+                <p class="text-xs text-secondary">Automatic regional data redundancy.</p>
+            </div>
+        </div>
+    </div>
+</section>
 @endsection
 
-@section('content')
-<div class="page-content">
-    <div class="container-fluid">
-        <!-- Floating Shapes -->
-        <div class="floating-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-        </div>
-
-        <div class="dashboard-container">
-            <!-- Welcome Card -->
-            <div class="welcome-card text-center" data-aos="fade-up">
-                <div class="robot-container">
-                    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.5/dist/dotlottie-wc.js" type="module"></script>
-                    <dotlottie-wc src="https://lottie.host/3ffaa88c-e8ac-4b0e-9fcc-0029b59d764a/CXHALuTfPV.lottie" class="lottie-robot" style="width: 350px; height: 350px;" autoplay loop>
-                    </dotlottie-wc>
-                </div>
-
-                <h1 class="welcome-title">Welcome Back!</h1>
-                <p class="welcome-subtitle">Hi, <strong>{{ Auth::user()->username ?? 'User' }}</strong> 👋</p>
-            </div>
-
-            <!-- Portal Cards -->
-            <div class="portals-section">
-                <div class="row justify-content-center g-4">
-                    @foreach ($portals as $key => $url)
-                    @php
-                    $jabatan = strtolower(Auth::user()->jabatan ?? '');
-                    $departemen = strtoupper(Auth::user()->departemen ?? '');
-                    $canAccess = false;
-
-                    // RULE 1: Semua Dept Head dari departemen apapun bisa akses semua portal
-                    if ($jabatan === 'dept_head') {
-                    $canAccess = true;
-                    }
-                    // RULE 2: Semua user dari Departemen IT bisa akses semua portal
-                    elseif ($departemen === 'IT') {
-                    $canAccess = true;
-                    }
-                    // RULE 3: User lain hanya bisa akses portal sesuai departemen mereka
-                    else {
-                    $jabatanUpper = strtoupper($jabatan);
-
-                    $portalAccess = [
-                    'engineering' => ['ENGINEERING', 'ENG'],
-                    'warehouse' => ['WAREHOUSE', 'WH'],
-                    'production' => ['PRODUCTION', 'PROD'],
-                    'qc' => ['QC', 'QUALITY CONTROL'],
-                    ];
-
-                    if (isset($portalAccess[$key])) {
-                    foreach ($portalAccess[$key] as $allowedRole) {
-                    if (str_contains($jabatanUpper, $allowedRole) || str_contains($departemen, $allowedRole)) {
-                    $canAccess = true;
-                    break;
-                    }
-                    }
-                    }
-                    }
-                    @endphp
-
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                        <div class="portal-card {{ !$canAccess ? 'disabled' : '' }}">
-                            <div class="portal-icon">
-                                @if($key === 'engineering')
-                                <i class="ri-tools-line"></i>
-                                @elseif($key === 'warehouse')
-                                <i class="ri-archive-line"></i>
-                                @elseif($key === 'production')
-                                <i class="ri-settings-3-line"></i>
-                                @elseif($key === 'qc')
-                                <i class="ri-checkbox-circle-line"></i>
-                                @else
-                                <i class="ri-dashboard-line"></i>
-                                @endif
-                            </div>
-
-                            <h5 class="portal-title">{{ ucfirst($key) }}</h5>
-                            <p class="portal-description">
-                                Akses portal {{ $key }} untuk melihat data dan aktivitas departemen secara lengkap dan terperinci.
-                            </p>
-
-                            @if($canAccess)
-                            <form method="POST" action="{{ route('portal.redirect', $key) }}" class="portal-form" data-target="{{ $key }}">
-                                @csrf
-                                <button type="submit" class="portal-btn">
-                                    <i class="ri-login-circle-line me-2"></i>
-                                    Masuk ke {{ ucfirst($key) }}
-                                </button>
-                            </form>
-                            @else
-                            <button type="button" class="portal-btn" disabled onclick="showAccessDenied('{{ ucfirst($key) }}')">
-                                <i class="ri-lock-line me-2"></i>
-                                Akses Terbatas
-                            </button>
-                            @endif
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Alert Notification -->
-<div id="alertNotification" class="alert-notification">
-    <div class="alert-content">
-        <i class="ri-error-warning-line alert-icon"></i>
-        <div class="alert-text">
-            <div class="alert-title">Akses Ditolak</div>
-            <div class="alert-message" id="alertMessage"></div>
-        </div>
-    </div>
-</div>
-
-<!-- AOS JS -->
-<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
-<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-
+@section('scripts')
 <script>
-    AOS.init({
-        duration: 800,
-        once: true,
-        easing: 'ease-out-cubic'
-    });
-
-    // Show access denied notification
     function showAccessDenied(portalName) {
-        const alertBox = document.getElementById('alertNotification');
-        const alertMessage = document.getElementById('alertMessage');
+        const alertContainer = document.getElementById('alertMessageContainer');
+        const alertText = document.getElementById('alertMessageText');
 
-        alertMessage.textContent = `Anda tidak memiliki akses ke portal ${portalName}. Hanya FM dan IT yang dapat mengakses semua portal.`;
+        alertText.textContent = `You don't have access to the ${portalName} portal. Only FM and IT can access all portals.`;
+        alertContainer.classList.remove('hidden');
+        alertContainer.classList.add('flex');
 
-        alertBox.classList.add('show');
-
+        // Auto hide after 5 seconds
         setTimeout(() => {
-            alertBox.classList.remove('show');
+            alertContainer.classList.add('hidden');
+            alertContainer.classList.remove('flex');
         }, 5000);
     }
 

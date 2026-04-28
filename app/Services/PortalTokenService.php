@@ -38,7 +38,7 @@ class PortalTokenService
                 // 'base_url' => env('PORTAL_QC_URL', 'http://localhost:8081'),
                 'base_url' => env('PORTAL_QC_URL', 'http://10.11.10.130:8081'),
                 'callback' => '/auth/sso/callback',
-                'label'    => 'QC',
+                'label'    => 'Quality Control',
             ],
         ];
     }
