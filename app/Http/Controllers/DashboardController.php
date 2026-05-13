@@ -30,14 +30,15 @@ class DashboardController extends Controller
      * Generate SSO token dan redirect browser langsung ke portal tujuan.
      * Portal kemudian akan pull-verify token ke endpoint /api/sso/verify Main-BAS.
      */
-    public function generateTokenRedirect($target)
+    public function generateTokenRedirect(Request $request, $target)
     {
         if (!$this->tokenService->isValidPortal($target)) {
             return back()->with('error', 'Portal tidak valid.');
         }
 
         $user        = Auth::user();
-        $redirectUrl = $this->tokenService->generateRedirectUrl($user, $target);
+        $path        = $request->query('redirect'); // Ambil path tujuan (misal: /inventory/items/1)
+        $redirectUrl = $this->tokenService->generateRedirectUrl($user, $target, $path);
 
         if (!$redirectUrl) {
             return back()->with('error', 'Gagal generate token SSO untuk portal ini.');
