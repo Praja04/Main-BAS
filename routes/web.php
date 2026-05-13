@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
@@ -43,4 +44,7 @@ Route::middleware('auth')->group(function () {
         // Dashboard utama
         Route::get('/', [DashboardController::class, 'index'])->name('index');
     });
+
+    // Notification proxy
+    Route::get('/notifications/warehouse', [NotificationController::class, 'getWarehouseNotifications'])->name('notifications.warehouse');
 });
