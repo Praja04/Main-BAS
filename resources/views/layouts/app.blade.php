@@ -124,8 +124,9 @@
 
                     let html = '';
                     data.forEach(n => {
-                        const warehouseUrl = 'http://10.11.10.130:8087'; 
-                        const fullUrl = n.url.startsWith('http') ? n.url : warehouseUrl + (n.url.startsWith('/') ? '' : '/') + n.url;
+                        // Gunakan bridge SSO agar user otomatis login ke warehouse
+                        const redirectBaseUrl = "{{ route('portal.redirect.get', 'warehouse') }}";
+                        const fullUrl = `${redirectBaseUrl}?redirect=${encodeURIComponent(n.url)}`;
                         
                         const icon = n.type === 'barang_baru' ? 'inventory_2' : 'notifications';
                         const iconColor = n.type === 'barang_baru' ? 'text-orange-500' : 'text-blue-500';

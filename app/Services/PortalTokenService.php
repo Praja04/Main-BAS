@@ -94,8 +94,9 @@ class PortalTokenService
     /**
      * Generate URL redirect browser ke portal SSO callback.
      * Ini yang dipakai setelah user menekan tombol portal di dashboard.
+     * $path: Opsional path tujuan di portal target (misal: /inventory/items/1)
      */
-    public function generateRedirectUrl(User $user, string $portalTarget): ?string
+    public function generateRedirectUrl(User $user, string $portalTarget, ?string $path = null): ?string
     {
         $portals = $this->portals();
         $portal  = $portals[$portalTarget] ?? null;
@@ -108,6 +109,10 @@ class PortalTokenService
         $token = $this->generateToken($user, $portalTarget);
 
         $callbackUrl = rtrim($portal['base_url'], '/') . $portal['callback'] . '?token=' . $token->token;
+
+        if ($path) {
+            $callbackUrl .= '&next=' . urlencode($path);
+        }
 
         Log::info("SSO: Token dihasilkan untuk [{$portalTarget}]", [
             'user'         => $user->username,
