@@ -1,113 +1,163 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Main - BAS</title>
-    <link rel="icon" href="{{ asset('assets/images/logo/kecap.png') }}" type="image/png">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <title>Main - BAS</title>
+        <link rel="icon" href="{{ asset('assets/images/logo/kecap.png') }}" type="image/png">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+            rel="stylesheet" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+            rel="stylesheet" />
 
-    {{-- SweetAlert2 CSS --}}
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+        {{-- SweetAlert2 CSS --}}
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"
+            type="text/css" />
 
-    <!-- jQuery should be included before DataTables -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+        <!-- jQuery should be included before DataTables -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <link href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+        <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @yield('styles')
-</head>
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @yield('styles')
+    </head>
 
-<body class="bg-[#F5F7F9] font-body-md text-on-surface flex flex-col min-h-screen">
-    <!-- TopNavBar -->
-    <nav class="fixed top-0 w-full z-50 border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-gray-200 dark:border-gray-800 shadow-sm">
-        <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-8">
-                <a href="{{ route('dashboard.index') }}" class="flex items-center gap-2 text-xl font-bold tracking-tighter text-gray-900 dark:text-white italic">
-                    <img src="{{ asset('assets/images/logo/kecap.png') }}" alt="BAS Logo" class="w-8 h-8 object-contain">
-                    PT. BAS
-                </a>
-                <!-- <div class="hidden md:flex gap-6 items-center font-sans antialiased font-medium text-sm tracking-tight">
-                    <a class="text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 cursor-pointer active:opacity-70" href="{{ route('dashboard.index') }}">Dashboard</a>
-                </div> -->
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="relative hidden lg:block">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                    <input class="pl-10 pr-4 py-1.5 rounded-full border-none bg-secondary-container/50 text-sm focus:ring-2 focus:ring-primary-container w-64 outline-none" placeholder="Search portal..." type="text" />
-                </div>
-                <div class="flex items-center gap-2">
-                    <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer active:opacity-70">
-                        <span class="material-symbols-outlined">notifications</span>
-                    </button>
-                    <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer active:opacity-70">
-                        <span class="material-symbols-outlined">help</span>
-                    </button>
-                    <div class="relative" id="userMenuContainer">
-                        <button id="userMenuBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer active:opacity-70">
-                            <span class="material-symbols-outlined">account_circle</span>
-                        </button>
-                        <div id="userMenuDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden border border-gray-200 z-50">
-                            <div class="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">
-                                <p class="font-bold">{{ Auth::user()?->username ?? 'User' }}</p>
-                                <p class="text-xs text-gray-500">{{ Auth::user()?->jabatan ?? '' }}</p>
-                            </div>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer">Sign out</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <main class="pt-16 flex-grow">
-        @yield('content')
-    </main>
-    <!-- Footer -->
-    <footer class="bg-gray-50 dark:bg-gray-950 w-full py-12 border-t mt-auto border-gray-200 dark:border-gray-800">
-        <div class="max-w-[1440px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex flex-col md:items-start items-center">
-                <span class="text-sm font-black text-gray-400 uppercase tracking-tighter mb-2">PT. BAS</span>
-                <p class="font-sans text-xs font-normal text-gray-500 dark:text-gray-400">© {{ date('Y') }} PT. BAS. All rights reserved.</p>
-            </div>
-            <div class="flex flex-wrap justify-center gap-8 font-sans text-xs font-normal">
-                <a class="text-gray-500 dark:text-gray-400 hover:underline hover:text-red-600 transition-all ease-in-out" href="#">Privacy Policy</a>
-                <a class="text-gray-500 dark:text-gray-400 hover:underline hover:text-red-600 transition-all ease-in-out" href="#">Terms of Service</a>
-                <a class="text-gray-500 dark:text-gray-400 hover:underline hover:text-red-600 transition-all ease-in-out" href="#">Internal Directory</a>
-                <a class="text-gray-500 dark:text-gray-400 hover:underline hover:text-red-600 transition-all ease-in-out" href="#">Support</a>
-            </div>
-        </div>
-    </footer>
+    <body class="bg-[#F5F7F9] font-body-md text-on-surface flex flex-col min-h-screen">
+        <!-- TopNavBar -->
+        @include('layouts.topbar')
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const btn = document.getElementById('userMenuBtn');
-            const menu = document.getElementById('userMenuDropdown');
+        <main class="pt-16 flex-grow">
+            @yield('content')
+        </main>
 
-            if (btn && menu) {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    menu.classList.toggle('hidden');
-                });
+        <!-- Footer -->
+        @include('layouts.footer')
 
-                document.addEventListener('click', function(e) {
-                    if (!menu.contains(e.target) && !btn.contains(e.target)) {
-                        menu.classList.add('hidden');
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // User Menu Toggle
+                const userBtn = document.getElementById('userMenuBtn');
+                const userMenu = document.getElementById('userMenuDropdown');
+
+                if (userBtn && userMenu) {
+                    userBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        userMenu.classList.toggle('hidden');
+                        if (notifMenu) notifMenu.classList.add('hidden');
+                    });
+                }
+
+                // Notifications Toggle
+                const notifBtn = document.getElementById('notifBtn');
+                const notifMenu = document.getElementById('notifDropdown');
+
+                if (notifBtn && notifMenu) {
+                    notifBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        notifMenu.classList.toggle('hidden');
+                        if (userMenu) userMenu.classList.add('hidden');
+                        if (!notifMenu.classList.contains('hidden')) {
+                            fetchNotifications();
+                        }
+                    });
+                }
+
+                document.addEventListener('click', (e) => {
+                    if (userMenu && !userMenu.contains(e.target) && !userBtn.contains(e.target)) {
+                        userMenu.classList.add('hidden');
+                    }
+                    if (notifMenu && !notifMenu.contains(e.target) && !notifBtn.contains(e.target)) {
+                        notifMenu.classList.add('hidden');
                     }
                 });
-            }
-        });
-    </script>
-    @yield('scripts')
-</body>
+
+                // Fetch Notifications Logic
+                function fetchNotifications() {
+                    $.ajax({
+                        url: "{{ route('notifications.warehouse') }}",
+                        method: 'GET',
+                        success: function(res) {
+                            if (res.success && res.data) {
+                                renderNotifications(res.data);
+                            }
+                        },
+                        error: function(err) {
+                            console.error('Failed to fetch warehouse notifications', err);
+                        }
+                    });
+                }
+
+                function renderNotifications(data) {
+                    const list = document.getElementById('notifList');
+                    const badge = document.getElementById('notifBadge');
+                    const countSpan = document.getElementById('notifCount');
+                    
+                    const unread = data.filter(n => !n.is_read);
+                    
+                    if (unread.length > 0) {
+                        badge.classList.remove('hidden');
+                        countSpan.textContent = `${unread.length} New`;
+                        countSpan.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                        countSpan.classList.add('hidden');
+                    }
+
+                    if (data.length === 0) {
+                        list.innerHTML = `
+                            <div class="py-12 px-4 text-center">
+                                <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <span class="material-symbols-outlined text-gray-300" style="font-size: 24px;">notifications_none</span>
+                                </div>
+                                <p class="text-xs text-gray-400">No notifications found</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = '';
+                    data.forEach(n => {
+                        const warehouseUrl = 'http://10.11.10.130:8087'; 
+                        const fullUrl = n.url.startsWith('http') ? n.url : warehouseUrl + (n.url.startsWith('/') ? '' : '/') + n.url;
+                        
+                        const icon = n.type === 'barang_baru' ? 'inventory_2' : 'notifications';
+                        const iconColor = n.type === 'barang_baru' ? 'text-orange-500' : 'text-blue-500';
+                        const bgColor = n.type === 'barang_baru' ? 'bg-orange-50' : 'bg-blue-50';
+
+                        html += `
+                            <a href="${fullUrl}" target="_blank" class="flex gap-3 px-4 py-4 hover:bg-gray-50/80 transition-all ${!n.is_read ? 'bg-blue-50/20' : ''}">
+                                <div class="flex-shrink-0 relative">
+                                    <div class="w-9 h-9 rounded-xl ${bgColor} flex items-center justify-center">
+                                        <span class="material-symbols-outlined ${iconColor} text-xl">${icon}</span>
+                                    </div>
+                                    ${!n.is_read ? '<span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>' : ''}
+                                </div>
+                                <div class="flex-grow min-w-0">
+                                    <div class="flex justify-between items-start mb-0.5">
+                                        <p class="text-[12px] font-bold text-gray-900 truncate pr-2">${n.title}</p>
+                                        <span class="text-[10px] text-gray-400 whitespace-nowrap">${n.created_at_human}</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-600 leading-snug line-clamp-2">${n.message}</p>
+                                </div>
+                            </a>
+                        `;
+                    });
+                    list.innerHTML = html;
+                }
+
+                // Initial fetch and interval
+                fetchNotifications();
+                setInterval(fetchNotifications, 60000); // Every 1 minute
+            });
+        </script>
+        @yield('scripts')
+    </body>
 
 </html>
