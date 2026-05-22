@@ -18,42 +18,9 @@
                 </p>
                 <p class="font-body-md text-secondary mb-8">Selamat Datang Kembali, <strong
                         class="text-primary">{{ Auth::user()?->username ?? 'User' }}</strong>!</p>
-                {{-- <a href="#portals"
-                    class="inline-flex bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-label-bold text-label-bold items-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-95 text-white no-underline hover:text-white">
-                    Go to Dashboard
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                </a> --}}
             </div>
         </div>
     </section>
-
-    <!-- Quick Access Panel -->
-    {{-- <section class="max-w-[1440px] mx-auto px-6 -mt-12 relative z-20">
-    <div class="glass-card rounded-2xl p-6 flex flex-wrap gap-4 items-center shadow-md">
-        <span class="font-label-bold text-label-bold text-gray-500 uppercase tracking-widest mr-4">Quick
-            Access:</span>
-        <button
-            class="px-4 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest transition-colors flex items-center gap-2 text-sm font-medium border border-outline-variant">
-            <span class="material-symbols-outlined text-primary text-[20px]">assessment</span>
-            Yield Reports
-        </button>
-        <button
-            class="px-4 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest transition-colors flex items-center gap-2 text-sm font-medium border border-outline-variant">
-            <span class="material-symbols-outlined text-primary text-[20px]">engineering</span>
-            Maintenance Log
-        </button>
-        <button
-            class="px-4 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest transition-colors flex items-center gap-2 text-sm font-medium border border-outline-variant">
-            <span class="material-symbols-outlined text-primary text-[20px]">inventory_2</span>
-            Stock Audit
-        </button>
-        <button
-            class="px-4 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest transition-colors flex items-center gap-2 text-sm font-medium border border-outline-variant">
-            <span class="material-symbols-outlined text-primary text-[20px]">gavel</span>
-            Compliance docs
-        </button>
-    </div>
-</section> --}}
 
     <!-- Main Grid Section -->
     <section id="portals" class="max-w-[1440px] mx-auto px-6 py-12">
@@ -69,7 +36,7 @@
         <div id="alertMessageContainer"
             class="hidden mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-r-lg shadow-sm">
             <div class="flex items-center">
-                <span class="material-symbols-outlined mr-2">error</span>
+                <x-heroicon-o-exclamation-circle class="w-5 h-5 mr-2" />
                 <p id="alertMessageText" class="font-medium"></p>
             </div>
         </div>
@@ -81,31 +48,23 @@
                     $departemen = strtoupper(Auth::user()?->departemen ?? '');
                     $canAccess = false;
 
-                    // RULE 1: Semua Dept Head dari departemen apapun bisa akses semua portal
                     if ($jabatan === 'dept_head' || $jabatan === 'fm') {
                         $canAccess = true;
                     }
-                    // RULE 2: Semua user dari Departemen IT bisa akses semua portal
                     elseif ($departemen === 'IT') {
                         $canAccess = true;
                     }
-                    // RULE 3: User lain hanya bisa akses portal sesuai departemen mereka
                     else {
                         $jabatanUpper = strtoupper($jabatan);
-
                         $portalAccess = [
                             'engineering' => ['ENGINEERING', 'ENG'],
                             'warehouse' => ['WAREHOUSE', 'WH'],
                             'production' => ['PRODUCTION', 'PROD'],
                             'qc' => ['QUALITY CONTROL', 'QC'],
                         ];
-
                         if (isset($portalAccess[$key])) {
                             foreach ($portalAccess[$key] as $allowedRole) {
-                                if (
-                                    str_contains($jabatanUpper, $allowedRole) ||
-                                    str_contains($departemen, $allowedRole)
-                                ) {
+                                if (str_contains($jabatanUpper, $allowedRole) || str_contains($departemen, $allowedRole)) {
                                     $canAccess = true;
                                     break;
                                 }
@@ -113,35 +72,27 @@
                         }
                     }
 
-                    // Portal Card Attributes
-                    $portalIcon = 'dashboard';
                     $portalStatusText = 'Online';
                     $portalStatusClass = 'bg-green-100 text-accent-success';
-                    $portalDesc =
-                        'Akses portal ' .
-                        ucfirst($key) .
-                        ' untuk melihat data dan aktivitas departemen secara lengkap dan terperinci.';
+                    $portalDesc = 'Akses portal ' . ucfirst($key) . ' untuk melihat data dan aktivitas departemen secara lengkap dan terperinci.';
+                    $iconComponent = 'heroicon-o-squares-2x2';
 
                     if ($key === 'engineering') {
-                        $portalIcon = 'architecture';
+                        $iconComponent = 'heroicon-o-beaker';
                         $portalStatusText = 'Active';
-                        $portalDesc =
-                            'R&D lifecycle management, technical schematics repository, and prototype performance monitoring.';
+                        $portalDesc = 'R&D lifecycle management, technical schematics repository, and prototype performance monitoring.';
                     } elseif ($key === 'warehouse') {
-                        $portalIcon = 'warehouse';
+                        $iconComponent = 'heroicon-o-archive-box';
                         $portalStatusText = 'Active';
-                        $portalDesc =
-                            'Automated inventory tracking, logistics coordination, and storage optimization for high-volume output.';
+                        $portalDesc = 'Automated inventory tracking, logistics coordination, and storage optimization for high-volume output.';
                     } elseif ($key === 'production') {
-                        $portalIcon = 'precision_manufacturing';
+                        $iconComponent = 'heroicon-o-cpu-chip';
                         $portalStatusText = 'Active';
-                        $portalDesc =
-                            'Live assembly line telemetry, output forecasting, and personnel shift scheduling systems.';
+                        $portalDesc = 'Live assembly line telemetry, output forecasting, and personnel shift scheduling systems.';
                     } elseif ($key === 'qc') {
-                        $portalIcon = 'verified';
+                        $iconComponent = 'heroicon-o-check-badge';
                         $portalStatusText = 'Active';
-                        $portalDesc =
-                            'Strict adherence to ISO standards, batch testing analytics, and defect tracking reports.';
+                        $portalDesc = 'Strict adherence to ISO standards, batch testing analytics, and defect tracking reports.';
                     }
                 @endphp
 
@@ -150,15 +101,15 @@
                     class="bg-white p-md rounded-[12px] border {{ $canAccess ? 'border-gray-200 shadow-sm hover:shadow-md' : 'border-gray-300 shadow-none opacity-75 grayscale-[50%]' }} transition-shadow flex flex-col h-full group relative">
                     @if (!$canAccess)
                         <div
-                            class="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full z-10 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">lock</span>
+                            class="absolute top-4 right-4 bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full z-10 flex items-center gap-1 shadow-sm">
+                            <x-heroicon-o-lock-closed class="w-3.5 h-3.5" />
                             Restricted Access
                         </div>
                     @endif
                     <div class="flex justify-between items-start mb-6">
                         <div
                             class="w-12 h-12 bg-primary-fixed rounded-xl flex items-center justify-center text-primary-container">
-                            <span class="material-symbols-outlined text-[28px]">{{ $portalIcon }}</span>
+                            <x-dynamic-component :component="$iconComponent" class="w-7 h-7" />
                         </div>
                         @if ($canAccess)
                             <span
@@ -175,47 +126,20 @@
                             <button type="submit"
                                 class="w-full py-3 rounded-lg border-2 border-primary-container text-primary-container font-label-bold hover:bg-primary-container hover:text-white transition-all flex items-center justify-center gap-2 group-hover:scale-[1.01] cursor-pointer">
                                 Enter Portal
-                                <span class="material-symbols-outlined text-[18px]">login</span>
+                                <x-heroicon-o-arrow-right-on-rectangle class="w-5 h-5" />
                             </button>
                         </form>
                     @else
                         <button type="button" onclick="showAccessDenied('{{ ucfirst($key) }}')"
                             class="w-full py-3 rounded-lg border-2 border-gray-400 text-gray-500 font-label-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2 mt-auto">
                             Access Denied
-                            <span class="material-symbols-outlined text-[18px]">lock</span>
+                            <x-heroicon-o-lock-closed class="w-5 h-5" />
                         </button>
                     @endif
                 </div>
             @endforeach
         </div>
     </section>
-
-    <!-- Secondary Banner -->
-    {{-- <section class="bg-surface-container-high py-16">
-        <div class="max-w-[1440px] mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="flex items-center gap-4">
-                <span class="material-symbols-outlined text-4xl text-primary">security</span>
-                <div>
-                    <h4 class="font-label-bold text-label-bold">Enterprise Security</h4>
-                    <p class="text-xs text-secondary">End-to-end encrypted data protocols.</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <span class="material-symbols-outlined text-4xl text-primary">speed</span>
-                <div>
-                    <h4 class="font-label-bold text-label-bold">Real-time Telemetry</h4>
-                    <p class="text-xs text-secondary">Under 50ms latency for global sensors.</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <span class="material-symbols-outlined text-4xl text-primary">cloud_done</span>
-                <div>
-                    <h4 class="font-label-bold text-label-bold">Cloud Synced</h4>
-                    <p class="text-xs text-secondary">Automatic regional data redundancy.</p>
-                </div>
-            </div>
-        </div>
-    </section> --}}
 @endsection
 
 @section('scripts')

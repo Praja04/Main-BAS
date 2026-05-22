@@ -33,6 +33,7 @@ class ProfileController extends Controller
 
         $request->validate([
             'username' => 'required|string|unique:users,username,' . $user->id,
+            'nama_lengkap' => 'required|string',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'nik' => 'required|string|unique:users,nik,' . $user->id,
             'departemen' => 'required|string',
@@ -42,19 +43,20 @@ class ProfileController extends Controller
 
         if ($request->hasFile('image')) {
             // Hapus gambar lama jika ada
-            if ($user->image && Storage::disk('public')->exists('profiles/' . $user->image)) {
-                Storage::disk('public')->delete('profiles/' . $user->image);
+            if ($user->image && file_exists(public_path('uploads/users/' . $user->image))) {
+                unlink(public_path('uploads/users/' . $user->image));
             }
 
-            // Upload gambar baru ke storage/app/public/profiles
+            // Upload gambar baru ke public/uploads/users
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('profiles', $filename, 'public');
+            $file->move(public_path('uploads/users'), $filename);
             $user->image = $filename;
         }
 
         $user->update([
             'username' => $request->username,
+            'nama_lengkap' => $request->nama_lengkap,
             'email' => $request->email,
             'nik' => $request->nik,
             'departemen' => $request->departemen,

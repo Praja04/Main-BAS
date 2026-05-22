@@ -11,14 +11,20 @@ Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Password Reset Routes
+Route::get('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
+
 Route::get('/sso/redirect/{portal}', [AuthController::class, 'showLoginForm'])->name('sso.redirect');
 Route::get('/portal/{target}', [DashboardController::class, 'generateTokenRedirect'])->name('portal.redirect.get');
 Route::post('/portal/{target}', [DashboardController::class, 'generateTokenRedirect'])->name('portal.redirect');
 
 //manage user
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::prefix('users')->as('users.')->group(function () {
-        Route::get('/index', [AuthController::class, 'manage_user'])->name('users.index');
+        Route::get('/index', [AuthController::class, 'manage_user'])->name('index');
         Route::get('/data', [AuthController::class, 'getUsers'])->name('get'); // API untuk DataTables
         Route::post('/', [AuthController::class, 'store'])->name('store'); // Simpan user baru
         Route::get('/{id}/edit', [AuthController::class, 'edit'])->name('edit'); // Ambil data user untuk edit

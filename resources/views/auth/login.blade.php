@@ -51,19 +51,23 @@
                 <div>
                     <label for="username" class="block font-label-bold text-on-surface mb-2">Username / NIK</label>
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">person</span>
+                        <x-heroicon-o-user class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input type="text" id="username" name="username" class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all bg-white/80 backdrop-blur-sm shadow-inner" placeholder="Enter your username or NIK" required>
                     </div>
                 </div>
 
                 <!-- Password -->
                 <div>
-                    <label for="password" class="block font-label-bold text-on-surface mb-2">Password</label>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="password" class="block font-label-bold text-on-surface">Password</label>
+                        <a href="{{ route('password.request') }}" class="text-xs text-primary-container hover:underline font-semibold">Forgot Password?</a>
+                    </div>
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">lock</span>
+                        <x-heroicon-o-lock-closed class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input type="password" id="password" name="password" class="w-full pl-12 pr-12 py-3 rounded-xl border border-gray-300 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 outline-none transition-all bg-white/80 backdrop-blur-sm shadow-inner" placeholder="Enter your password" required>
                         <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-container transition-colors focus:outline-none">
-                            <span class="material-symbols-outlined" id="eyeIcon">visibility_off</span>
+                            <x-heroicon-o-eye-slash id="eyeSlashIcon" class="w-5 h-5" />
+                            <x-heroicon-o-eye id="eyeIcon" class="w-5 h-5 hidden" />
                         </button>
                     </div>
                 </div>
@@ -71,7 +75,7 @@
                 <!-- Submit Button -->
                 <button type="submit" class="w-full bg-primary-container text-on-primary-container px-8 py-4 rounded-xl font-label-bold text-label-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all active:scale-95 mt-4 group cursor-pointer">
                     Login
-                    <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">login</span>
+                    <x-heroicon-o-arrow-right-on-rectangle class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
             </form>
 
@@ -87,14 +91,17 @@
         // Password Toggle
         document.getElementById('togglePassword').addEventListener('click', function() {
             const passwordInput = document.getElementById('password');
-            const icon = document.getElementById('eyeIcon');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const eyeSlashIcon = document.getElementById('eyeSlashIcon');
 
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                icon.textContent = 'visibility';
+                eyeIcon.classList.remove('hidden');
+                eyeSlashIcon.classList.add('hidden');
             } else {
                 passwordInput.type = 'password';
-                icon.textContent = 'visibility_off';
+                eyeIcon.classList.add('hidden');
+                eyeSlashIcon.classList.remove('hidden');
             }
         });
 

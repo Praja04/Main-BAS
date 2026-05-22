@@ -17,6 +17,7 @@ class AdminSeeder extends Seeder
             'email'      => 'admin@example.com',
             'password'   => '12345678', // akan otomatis di-hash
             'jabatan'    => 'dept_head',
+            'role'       => 'admin',
             'nik'        => '025000579',
             'departemen' => 'IT',
             'bagian'     => 'Backend',

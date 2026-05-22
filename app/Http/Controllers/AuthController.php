@@ -119,7 +119,7 @@ class AuthController extends Controller
 
     public function getUsers()
     {
-        $users = User::select('id', 'username', 'jabatan', 'email', 'nik', 'image', 'created_at', 'departemen', 'bagian')->get();
+        $users = User::select('id', 'username', 'nama_lengkap', 'jabatan', 'role', 'email', 'nik', 'image', 'created_at', 'departemen', 'bagian')->get();
 
         return response()->json($users);
     }
@@ -127,11 +127,13 @@ class AuthController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'username'   => 'required|unique:users',
-            'password'   => 'required|min:6',
-            'email'      => 'required|email',
-            'jabatan'    => 'required',
-            'nik'        => 'required',
+            'username'     => 'required|unique:users',
+            'nama_lengkap' => 'required',
+            'password'     => 'required|min:6',
+            'email'        => 'required|email',
+            'jabatan'      => 'required',
+            'role'         => 'required|in:admin,user',
+            'nik'          => 'required',
             'departemen' => 'required',
             'bagian'     => 'required',
             'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -149,6 +151,7 @@ class AuthController extends Controller
             'email'      => $request->email,
             'nik'        => $request->nik,
             'jabatan'    => $request->jabatan,
+            'role'       => $request->role,
             'departemen' => $request->departemen,
             'bagian'     => $request->bagian,
             'image'      => $imageName,
@@ -169,6 +172,7 @@ class AuthController extends Controller
             'username'   => 'required|unique:users,username,' . $id,
             'email'      => 'required|email',
             'jabatan'    => 'required',
+            'role'       => 'required|in:admin,user',
             'nik'        => 'required',
             'departemen' => 'required',
             'bagian'     => 'required',
@@ -191,6 +195,7 @@ class AuthController extends Controller
             'username'   => $request->username,
             'email'      => $request->email,
             'jabatan'    => $request->jabatan,
+            'role'       => $request->role,
             'nik'        => $request->nik,
             'departemen' => $request->departemen,
             'bagian'     => $request->bagian,

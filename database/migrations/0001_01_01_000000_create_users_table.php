@@ -14,15 +14,16 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id(); // BIGINT UNSIGNED AUTO_INCREMENT
             $table->string('username')->unique();
+            $table->string('nama_lengkap')->nullable();
             $table->string('password');
-            $table->timestamps(); // created_at & updated_at
-
             $table->enum('jabatan', ['dept_head', 'foreman', 'supervisor'])->nullable();
             $table->string('image')->nullable();
             $table->string('email')->nullable();
             $table->string('departemen', 100)->nullable();
             $table->string('bagian', 100)->nullable();
             $table->integer('nik')->nullable();
+
+            $table->timestamps(); // created_at & updated_at
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
