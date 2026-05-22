@@ -84,7 +84,7 @@
                         <div>
                             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Member
                                 Since</label>
-                            <p class="text-gray-800 font-medium">{{ $user->created_at->format('d M Y') ?? '-' }}</p>
+                            <p class="text-gray-800 font-medium">{{ $user->created_at?->format('d M Y') ?? '-' }}</p>
                         </div>
                     </div>
                 </div>
