@@ -95,9 +95,9 @@
                     const list = document.getElementById('notifList');
                     const badge = document.getElementById('notifBadge');
                     const countSpan = document.getElementById('notifCount');
-                    
+
                     const unread = data.filter(n => !n.is_read);
-                    
+
                     if (unread.length > 0) {
                         badge.classList.remove('hidden');
                         countSpan.textContent = `${unread.length} New`;
@@ -124,7 +124,7 @@
                         // Gunakan bridge SSO agar user otomatis login ke warehouse
                         const redirectBaseUrl = "{{ route('portal.redirect.get', 'warehouse') }}";
                         const fullUrl = `${redirectBaseUrl}?redirect=${encodeURIComponent(n.url)}`;
-                        
+
                         const icon = n.type === 'barang_baru' ? 'inventory_2' : 'notifications';
                         const iconColor = n.type === 'barang_baru' ? 'text-orange-500' : 'text-blue-500';
                         const bgColor = n.type === 'barang_baru' ? 'bg-orange-50' : 'bg-blue-50';
@@ -133,7 +133,7 @@
                             <a href="${fullUrl}" target="_blank" class="flex gap-3 px-4 py-4 hover:bg-gray-50/80 transition-all ${!n.is_read ? 'bg-blue-50/20' : ''}">
                                 <div class="flex-shrink-0 relative">
                                     <div class="w-9 h-9 rounded-xl ${bgColor} flex items-center justify-center">
-                                        <span class="material-symbols-outlined ${iconColor} text-xl">${icon}</span>
+                                        <span class="material-symbols-outlined text-orange-500 text-xl">notifications</span>
                                     </div>
                                     ${!n.is_read ? '<span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>' : ''}
                                 </div>
