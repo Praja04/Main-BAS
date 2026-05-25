@@ -133,7 +133,7 @@
                             <a href="${fullUrl}" target="_blank" class="flex gap-3 px-4 py-4 hover:bg-gray-50/80 transition-all ${!n.is_read ? 'bg-blue-50/20' : ''}">
                                 <div class="flex-shrink-0 relative">
                                     <div class="w-9 h-9 rounded-xl ${bgColor} flex items-center justify-center">
-                                        <span class="material-symbols-outlined text-orange-500 text-xl">notifications</span>
+                                        <x-heroicon-o-bell class="w-6 h-6" />
                                     </div>
                                     ${!n.is_read ? '<span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>' : ''}
                                 </div>
