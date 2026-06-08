@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\RfidLogController;
 use App\Http\Controllers\Api\TokenValidationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +11,12 @@ use Illuminate\Support\Facades\Route;
  */
 Route::post('/sso/verify', [TokenValidationController::class, 'verify'])
     ->name('api.sso.verify');
+
+/**
+ * RFID Endpoint - Menyimpan data scan kartu RFID (SN Card)
+ */
+Route::post('/rfid', [RfidLogController::class, 'store'])
+    ->name('api.rfid.store');
 
 /**
  * User info (untuk portal yang sudah punya Sanctum token - opsional)
