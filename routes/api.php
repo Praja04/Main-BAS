@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\DataIdcardController;
 use App\Http\Controllers\Api\RfidLogController;
 use App\Http\Controllers\Api\TokenValidationController;
 use Illuminate\Http\Request;
@@ -17,6 +18,12 @@ Route::post('/sso/verify', [TokenValidationController::class, 'verify'])
  */
 Route::post('/rfid', [RfidLogController::class, 'store'])
     ->name('api.rfid.store');
+
+/**
+ * Data ID Card Endpoint - Mendapatkan list semua SN Card
+ */
+Route::get('/data-idcard', [DataIdcardController::class, 'index'])
+    ->name('api.data-idcard.index');
 
 /**
  * User info (untuk portal yang sudah punya Sanctum token - opsional)
