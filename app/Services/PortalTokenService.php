@@ -81,7 +81,7 @@ class PortalTokenService
                 'id'         => $user->id,
                 'username'   => $user->username,
                 'email'      => $user->email,
-                'name'       => $user->name ?? $user->username,
+                'name'       => $user->nama_lengkap ?? $user->username,
                 'nik'        => $user->nik,
                 'jabatan'    => $user->jabatan,
                 'departemen' => $user->departemen,
