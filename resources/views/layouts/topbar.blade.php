@@ -29,6 +29,16 @@
                                 User Management
                             </a>
                         @endif
+                        
+                        <!-- IMS Menus -->
+                        @if (strtoupper(Auth::user()->departemen) === 'IMS')
+                            <a href="{{ route('ims.dashboard') }}"
+                                class="px-4 py-2 rounded-lg text-sm font-semibold {{ request()->routeIs('ims.dashboard') ? 'bg-blue-100 text-blue-700' : 'text-secondary hover:bg-gray-100' }} transition-all flex items-center gap-2">
+                                <x-heroicon-o-chart-bar class="w-5 h-5" />
+                                IMS Dashboard
+                            </a>
+                        @endif
+                       
                     </div>
                 @endauth
                 <div class="relative" id="notifContainer">

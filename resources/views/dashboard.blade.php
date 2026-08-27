@@ -42,6 +42,29 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+            <!-- IMS Portal Card (Internal to Main-BAS) -->
+            <div class="bg-white p-md rounded-[12px] border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full group relative">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-700">
+                        <x-heroicon-o-document-text class="w-7 h-7" />
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">Internal</span>
+                </div>
+                <h3 class="font-h3 text-h3 mb-2">IMS Document Control</h3>
+                <p class="text-secondary font-body-md mb-8 flex-grow">Manage standard operating procedures, forms, and official company document requests globally.</p>
+                
+                @if (strtoupper(Auth::user()->departemen) === 'IMS')
+                    <a href="{{ route('ims.dashboard') }}" class="w-full py-3 mb-2 rounded-lg border-2 border-blue-600 text-blue-600 font-label-bold hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2 group-hover:scale-[1.01]">
+                        Open IMS Dashboard
+                        <x-heroicon-o-chart-bar class="w-5 h-5" />
+                    </a>
+                @endif
+                <a href="{{ route('ims.document_requests.index') }}" class="w-full py-3 rounded-lg bg-blue-50 text-blue-700 font-label-bold hover:bg-blue-100 transition-all flex items-center justify-center gap-2 mt-auto">
+                    Document Requests Log
+                    <x-heroicon-o-arrow-right class="w-5 h-5" />
+                </a>
+            </div>
+
             @foreach ($portals as $key => $url)
                 @php
                     $jabatan = strtolower(Auth::user()?->jabatan ?? '');

@@ -54,4 +54,14 @@ Route::middleware('auth')->group(function () {
 
     // Notification proxy
     Route::get('/notifications/warehouse', [NotificationController::class, 'getWarehouseNotifications'])->name('notifications.warehouse');
+
+    // IMS Routes
+    Route::prefix('ims')->name('ims.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\IMS\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/document-requests', [\App\Http\Controllers\IMS\DocumentRequestController::class, 'index'])->name('document_requests.index');
+        Route::get('/document-requests/create', [\App\Http\Controllers\IMS\DocumentRequestController::class, 'create'])->name('document_requests.create');
+        Route::post('/document-requests', [\App\Http\Controllers\IMS\DocumentRequestController::class, 'store'])->name('document_requests.store');
+        Route::get('/document-requests/{id}', [\App\Http\Controllers\IMS\DocumentRequestController::class, 'show'])->name('document_requests.show');
+        Route::post('/document-requests/{id}/approve', [\App\Http\Controllers\IMS\DocumentRequestController::class, 'approve'])->name('document_requests.approve');
+    });
 });
